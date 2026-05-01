@@ -7,6 +7,7 @@ import ru.kata.spring.boot_security.demo.dao.UserRepository;
 import ru.kata.spring.boot_security.demo.entity.Role;
 import ru.kata.spring.boot_security.demo.entity.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,16 +48,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUser(User user, String roleName) {
         Role role = roleService.findByName(roleName);
+        if (role == null) {
+            throw new RuntimeException("Role not found: " + roleName);
+        }
         User existingUser = userRepository.findById(user.getId()).orElseThrow();
 
         existingUser.setName(user.getName());
         existingUser.setAge(user.getAge());
         existingUser.setUsername(user.getUsername());
-        existingUser.setRoles(List.of(role));
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(user.getPassword());
         }
+
+        existingUser.setRoles(new ArrayList<>(List.of(role)));
 
         userRepository.save(existingUser);
     }
